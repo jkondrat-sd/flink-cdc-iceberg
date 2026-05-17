@@ -47,8 +47,8 @@ echo ""
 echo "=== Flink S3 plugin ==="
 
 download \
-  "$MAVEN_CENTRAL/org/apache/flink/flink-s3-fs-hadoop/1.19.1/flink-s3-fs-hadoop-1.19.1.jar" \
-  "$PLUGIN_DIR/flink-s3-fs-hadoop-1.19.1.jar"
+  "$MAVEN_CENTRAL/org/apache/flink/flink-s3-fs-hadoop/1.20.4/flink-s3-fs-hadoop-1.20.4.jar" \
+  "$PLUGIN_DIR/flink-s3-fs-hadoop-1.20.4.jar"
 
 # =============================================================================
 # LIB — Iceberg
@@ -60,8 +60,8 @@ echo ""
 echo "=== Iceberg ==="
 
 download \
-  "$MAVEN_CENTRAL/org/apache/iceberg/iceberg-flink-runtime-1.19/1.8.0/iceberg-flink-runtime-1.19-1.8.0.jar" \
-  "$LIB_DIR/iceberg-flink-runtime-1.19-1.8.0.jar"
+  "$MAVEN_CENTRAL/org/apache/iceberg/iceberg-flink-runtime-1.20/1.8.1/iceberg-flink-runtime-1.20-1.8.1.jar" \
+  "$LIB_DIR/iceberg-flink-runtime-1.20-1.8.1.jar"
 
 # =============================================================================
 # LIB — Hive Metastore client
@@ -105,24 +105,24 @@ download \
   "$LIB_DIR/s3-2.20.18.jar"
   
 download \
-  "$MAVEN_CENTRAL/org/apache/flink/flink-connector-kafka/3.2.0-1.19/flink-connector-kafka-3.2.0-1.19.jar" \
-  "$LIB_DIR/flink-connector-kafka-3.2.0-1.19.jar"
+  "$MAVEN_CENTRAL/org/apache/flink/flink-connector-kafka/3.4.0-1.20/flink-connector-kafka-3.4.0-1.20.jar" \
+  "$LIB_DIR/flink-connector-kafka-3.4.0-1.20.jar"
   
 download \
   "$MAVEN_CENTRAL/org/apache/kafka/kafka-clients/3.7.1/kafka-clients-3.7.1.jar" \
   "$LIB_DIR/kafka-clients-3.7.1.jar"
   
 download \
-  "$MAVEN_CENTRAL/org/apache/flink/flink-parquet/1.19.1/flink-parquet-1.19.1.jar" \
-  "$LIB_DIR/flink-parquet-1.19.1.jar"
+  "$MAVEN_CENTRAL/org/apache/flink/flink-parquet/1.20.4/flink-parquet-1.20.4.jar" \
+  "$LIB_DIR/flink-parquet-1.20.4.jar"
 #
 #download \
 #  "https://repo.maven.apache.org/maven2/org/apache/flink/flink-shaded-hadoop-2-uber/2.8.3-10.0/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar" \
 #  "$LIB_DIR/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar"
 
 download \
-  "$MAVEN_CENTRAL/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar" \
-  "$LIB_DIR/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar"
+  "$MAVEN_CENTRAL/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.20.4/flink-sql-connector-hive-3.1.3_2.12-1.20.4.jar" \
+  "$LIB_DIR/flink-sql-connector-hive-3.1.3_2.12-1.20.4.jar"
 
 download \
   "$MAVEN_CENTRAL/org/apache/hadoop/thirdparty/hadoop-shaded-guava/1.1.1/hadoop-shaded-guava-1.1.1.jar" \
@@ -134,8 +134,8 @@ download \
 
 
 download \
-  "$MAVEN_CENTRAL/org/apache/flink/flink-sql-parquet/1.19.1/flink-sql-parquet-1.19.1.jar" \
-  "$LIB_DIR/flink-sql-parquet-1.19.1.jar"
+  "$MAVEN_CENTRAL/org/apache/flink/flink-sql-parquet/1.20.4/flink-sql-parquet-1.20.4.jar" \
+  "$LIB_DIR/flink-sql-parquet-1.20.4.jar"
 
 download \
   "https://repo1.maven.org/maven2/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar" \
