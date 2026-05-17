@@ -53,7 +53,7 @@ flink-cdc-iceberg/
     │   └── DebeziumAvroToRowDataDeserializer.java          # deserializer for kafka message
     ├── schema
     │   ├── DebeziumAvroToIcebergSchemaConverter.java       # convert avro schema to iceberg schema
-    │   └── SchemaUtilsV2.java
+    │   └── SchemaUtils.java
     ├── sink
     │   └── IcebergSinkFactoryV2.java                       # attach FlinkSink to sink to iceberg table
     └── transform

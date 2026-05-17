@@ -3,13 +3,10 @@ package com.example.schema;
 import org.apache.avro.Schema;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.types.DataType;
-import org.apache.iceberg.types.Types;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-public class SchemaUtilsV2 {
+public class SchemaUtils {
     private static final Map<Schema.Type, DataType> basicDataTypes = Map.of(
             Schema.Type.STRING, DataTypes.STRING(),
             Schema.Type.INT, DataTypes.INT(),

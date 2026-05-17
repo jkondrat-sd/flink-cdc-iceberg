@@ -4,10 +4,10 @@ import com.example.config.AppConfig;
 import com.example.deserialization.DebeziumAvroToRowDataDeserializer;
 import com.example.sink.IcebergSinkFactoryV2;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.data.RowData;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class CdcToIcebergJob {
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(appConfig.getCheckpointIntervalMs());
         env.getCheckpointConfig().setCheckpointTimeout(60_000);
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
-        env.getCheckpointConfig().setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        env.getCheckpointConfig().setExternalizedCheckpointRetention(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
 
         Configuration flinkConfig = new Configuration();
 
@@ -59,12 +59,7 @@ public class CdcToIcebergJob {
 
 //        cdcStream.print();
 
-        DataStream<RowData> rowDataStream = cdcStream
-                .flatMap(new com.example.transform.FlatMapRowData())
-                .name("cdc-to-rowdata")
-                .uid("cdc-to-rowdata");
-
-        IcebergSinkFactoryV2.attachSink(rowDataStream, appConfig);
+        IcebergSinkFactoryV2.attachSink(cdcStream, appConfig);
 
         env.execute(appConfig.getJobName());
     }

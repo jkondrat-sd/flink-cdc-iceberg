@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import com.example.schema.SchemaUtilsV2;
+import com.example.schema.SchemaUtils;
 
 public class DebeziumAvroToRowDataDeserializer
         implements KafkaRecordDeserializationSchema<RowData> {
@@ -78,33 +78,6 @@ public class DebeziumAvroToRowDataDeserializer
         GenericRecord after  = (GenericRecord) envelope.get("after");
         String op = envelope.get("op").toString();
 
-//        Schema rowSchema = resolveRowSchema(envelope.getSchema(), "after");
-//        List<Schema.Field> fields = rowSchema.getFields();
-//        for (Schema.Field f : fields) {
-//            Schema realType = unwrapNullableUnion(f.schema());
-//            System.out.println(f.name() + " ### value: " + after.get(f.name()) + " ### " + realType.toString() + " --- class: " + realType.getClass().toString() + " --- type: " + realType.getType());
-//            System.out.println(realType.getType() == Schema.Type.STRING);
-//            if (realType.getLogicalType() != null) {
-//                System.out.println(realType.getObjectProp("scale"));
-//                System.out.println(realType.getObjectProp("precision"));
-//                System.out.println("logical type: " + realType.getLogicalType().toString());
-//                System.out.println(realType.getLogicalType().getClass() == LogicalTypes.Decimal.class);
-//            }
-//            if (realType.getObjectProp("connect.name") != null) {
-//                System.out.println("connect.name: " + realType.getObjectProp("connect.name"));
-//                try {
-//                    Class<?> klazz = Class.forName(realType.getObjectProp("connect.name").toString());
-//                    System.out.println("class: " + klazz.toString());
-//                } catch (ClassNotFoundException clfe) {
-//                    System.out.println("Cannot find class " + realType.getObjectProp("connect.name").toString());
-//                }
-//            }
-//            System.out.println("---------------------------------------------------------------");
-//        }
-
-//        System.out.println("Debug rowSchema: " + rowSchema.toString());
-//        System.out.println("Debug after: type " + envelope.get("after").getClass().toString() + " --- " + envelope.get("after"));
-
         switch (op) {
             case "c", "r":
                 out.collect(recordToRowData(after, RowKind.INSERT));
@@ -132,7 +105,6 @@ public class DebeziumAvroToRowDataDeserializer
         } catch (Exception e) {
             throw new IOException("Failed to fetch schema id=" + schemaId, e);
         }
-//        System.out.println("Debug schema: " + writerSchema.toString());
 
         ByteArrayInputStream in =
                 new ByteArrayInputStream(bytes, PREFIX_SIZE, bytes.length - PREFIX_SIZE);
@@ -145,40 +117,20 @@ public class DebeziumAvroToRowDataDeserializer
         return reader.read(null, decoder);
     }
 
-    // ============================
-    // 🔥 CORE: GenericRecord → RowData
-    // ============================
-
     private GenericRowData recordToRowData(GenericRecord record, RowKind kind) {
-        Schema rowSchema = SchemaUtilsV2.unwrapNullableUnion(record.getSchema());
+        Schema rowSchema = SchemaUtils.unwrapNullableUnion(record.getSchema());
         List<Schema.Field> fields = rowSchema.getFields();
 
         GenericRowData grd = new GenericRowData(kind, fields.size());
         for (int i = 0; i < fields.size(); i++) {
             Object value = record.get(fields.get(i).name());
-            DataType fieldDataType = SchemaUtilsV2.getFieldClass(fields.get(i));
+            DataType fieldDataType = SchemaUtils.getFieldClass(fields.get(i));
             grd.setField(i, convertValue(value, fieldDataType));
         }
 
         return grd;
     }
 
-//    private GenericRowData convertToRowData(GenericRecord record, String op) {
-//        List<Schema.Field> fields = record.getSchema().getFields();
-//
-//        // +1 for __op column
-//        GenericRowData rowData = new GenericRowData(fields.size() + 1);
-//
-//        // first column = operation
-//        rowData.setField(0, StringData.fromString(op));
-//
-//        for (int i = 0; i < fields.size(); i++) {
-//            Object value = record.get(fields.get(i).name());
-//            rowData.setField(i + 1, convertValue(value));
-//        }
-//
-//        return rowData;
-//    }
     private Object convertValue(Object value, DataType fieldDatatype) {
         if (value == null) return null;
 
@@ -279,51 +231,6 @@ public class DebeziumAvroToRowDataDeserializer
                 return StringData.fromString(value.toString());
         }
     }
-
-//    private Object convertValue(Object value) {
-//        if (value == null) return null;
-//
-//        System.out.println("value: " + value + " --- type: " + value.getClass().toString());
-//
-//        // string
-//        if (value instanceof CharSequence) {
-//            return StringData.fromString(value.toString());
-//        }
-//
-//        // primitive types
-//        if (value instanceof Integer ||
-//                value instanceof Long ||
-//                value instanceof Double ||
-//                value instanceof Float ||
-//                value instanceof Boolean) {
-//            return value;
-//        }
-//
-//        // bytes
-//        if (value instanceof ByteBuffer buffer) {
-//            return buffer.array();
-//        }
-//
-//        // decimal (Debezium often uses bytes or string)
-//        if (value instanceof byte[] bytes) {
-//            try {
-//                return DecimalData.fromBigDecimal(
-//                        new BigDecimal(new String(bytes)),
-//                        38,
-//                        18
-//                );
-//            } catch (Exception e) {
-//                return bytes; // fallback
-//            }
-//        }
-//
-//        // nested struct
-//        if (value instanceof GenericRecord nested) {
-//            return convertToRowData(nested, "nested");
-//        }
-//
-//        throw new RuntimeException("Unsupported type: " + value.getClass());
-//    }
 
     @Override
     public TypeInformation<RowData> getProducedType() {
