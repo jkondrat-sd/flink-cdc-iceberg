@@ -18,12 +18,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Core version pins -->
-        <flink.version>1.19.1</flink.version>
-        <iceberg.version>1.8.0</iceberg.version>
+        <flink.version>1.20.4</flink.version>
+        <iceberg.version>1.8.1</iceberg.version>
         <hadoop.version>3.3.4</hadoop.version>
         <hive.version>3.1.3</hive.version>
-        <kafka.version>3.5.1</kafka.version>
-        <flink.kafka.version>3.2.0-1.19</flink.kafka.version>
+        <kafka.version>3.6.2</kafka.version>
+        <flink.kafka.version>3.4.0-1.20</flink.kafka.version>
 
         <!-- Logging -->
         <slf4j.version>1.7.36</slf4j.version>
@@ -83,14 +83,14 @@
              ═══════════════════════════════════════════════════════════════════ -->
         <dependency>
             <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-flink-runtime-1.19</artifactId>
+            <artifactId>iceberg-flink-runtime-1.20</artifactId>
             <version>${iceberg.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-api</artifactId>
-            <version>1.8.0</version>
+            <version>${iceberg.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- Iceberg Hive catalog support -->

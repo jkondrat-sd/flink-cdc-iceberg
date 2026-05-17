@@ -1,4 +1,4 @@
-FROM flink:1.19.1-scala_2.12-java17
+FROM flink:1.20.4-scala_2.12-java17
 
 COPY conf/hive-site.xml /opt/flink/conf/hive-site.xml
 
