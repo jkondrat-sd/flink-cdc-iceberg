@@ -36,8 +36,8 @@ public class CdcToIcebergJob {
         Configuration flinkConfig = new Configuration();
 
         flinkConfig.set(CheckpointingOptions.CHECKPOINT_STORAGE, "filesystem");
-        flinkConfig.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, "s3a://iceberg/flink-checkpoints/" + appConfig.getJobName());
-        flinkConfig.set(CheckpointingOptions.SAVEPOINT_DIRECTORY, "s3a://iceberg/flink-savepoints/" + appConfig.getJobName());
+        flinkConfig.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, appConfig.getCheckpointDirectory());
+        flinkConfig.set(CheckpointingOptions.SAVEPOINT_DIRECTORY, appConfig.getSavepointDirectory());
 
         env.configure(flinkConfig);
         env.setParallelism(appConfig.getParallelism());

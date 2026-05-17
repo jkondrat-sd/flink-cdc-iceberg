@@ -3,6 +3,7 @@ package com.example.config;
 import org.apache.flink.api.java.utils.ParameterTool;
 
 import java.io.Serializable;
+import java.util.InputMismatchException;
 import java.util.Properties;
 
 /**
@@ -37,6 +38,8 @@ public class AppConfig implements Serializable {
     private final String jobName;
     private final long checkpointIntervalMs;
     private final int parallelism;
+    private final String checkpointDirectory;
+    private final String savepointDirectory;
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -59,6 +62,8 @@ public class AppConfig implements Serializable {
         this.jobName               = "debezium-cdc-iceberg";
         this.checkpointIntervalMs  = 30_000L;
         this.parallelism  = 2;
+        this.checkpointDirectory = "";
+        this.savepointDirectory = "";
     }
 
     private AppConfig(ParameterTool params) {
@@ -80,6 +85,12 @@ public class AppConfig implements Serializable {
         this.jobName               = params.get("job.name", "debezium-cdc-iceberg");
         this.checkpointIntervalMs  = params.getLong("checkpoint.interval.ms", 30_000L);
         this.parallelism  = params.getInt("parallelism", 2);
+        this.checkpointDirectory = params.get("checkpoint.directory", "");
+        this.savepointDirectory = params.get("savepoint.directory", "");
+
+        if (this.checkpointDirectory.isEmpty() || this.savepointDirectory.isEmpty()) {
+            throw new InputMismatchException("Must specify checkpoint.directory and savepoint.directory");
+        }
     }
 
     public static AppConfig fromArgs(String[] args) {
@@ -112,6 +123,8 @@ public class AppConfig implements Serializable {
     public String getJobName()               { return jobName; }
     public long   getCheckpointIntervalMs()  { return checkpointIntervalMs; }
     public int getParallelism() { return parallelism; }
+    public String getCheckpointDirectory() { return checkpointDirectory; }
+    public String getSavepointDirectory() { return savepointDirectory; }
 
     public String getFullTableIdentifier() {
         return icebergDatabase + "." + icebergTable;
