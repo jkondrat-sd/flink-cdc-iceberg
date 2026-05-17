@@ -21,12 +21,12 @@ Postgres ──[WAL]──► Debezium Connect ──► Kafka
 
 | Component             | Version    |
 |-----------------------|------------|
-| Apache Flink          | 1.19.1     |
-| Apache Iceberg        | 1.8.0      |
+| Apache Flink          | 1.20.4     |
+| Apache Iceberg        | 1.8.1      |
 | Apache Hadoop         | 3.3.4      |
 | Apache Hive (HMS)     | 3.1.3      |
 | Apache Kafka          | 3.6.2      |
-| flink-connector-kafka | 3.2.0-1.19 |
+| flink-connector-kafka | 3.4.0-1.20 |
 | Debezium              | 2.7.0      |
 | Java                  | 17         |
 
@@ -54,10 +54,8 @@ flink-cdc-iceberg/
     ├── schema
     │   ├── DebeziumAvroToIcebergSchemaConverter.java       # convert avro schema to iceberg schema
     │   └── SchemaUtils.java
-    ├── sink
-    │   └── IcebergSinkFactoryV2.java                       # attach FlinkSink to sink to iceberg table
-    └── transform
-        └── FlatMapRowData.java
+    └── sink
+        └── IcebergSinkFactoryV2.java                       # attach FlinkSink to sink to iceberg table
 ```
 
 ---
