@@ -1,8 +1,11 @@
 package com.example.config;
 
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.ExternalizedCheckpointRetention;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Properties;
 
@@ -18,6 +21,7 @@ public class AppConfig implements Serializable {
     private final String kafkaBootstrapServers;
     private final String kafkaTopic;
     private final String kafkaGroupId;
+    private final OffsetResetStrategy autoOffsetReset;
 
     private final String schemaRegistryUrl;
 
@@ -37,39 +41,23 @@ public class AppConfig implements Serializable {
     // ── Runtime ───────────────────────────────────────────────────────────────
     private final String jobName;
     private final long checkpointIntervalMs;
+    private final long minPauseBetweenCheckpoints;
+    private final long checkpointTimeoutMs;
+    private final int maxConcurrentCheckpoints;
+    private final ExternalizedCheckpointRetention externalizedCheckpointRetention;
     private final int parallelism;
     private final String checkpointDirectory;
     private final String savepointDirectory;
-
-    // ─────────────────────────────────────────────────────────────────────────
-
-    public AppConfig() {
-        this.kafkaBootstrapServers = "localhost:9092";
-        this.kafkaTopic            = "dbserver1.public.orders";
-        this.kafkaGroupId          = "test-111";
-        this.schemaRegistryUrl = "http://localhost:8081";
-
-        this.catalogName           = "teko_datawarehouse";
-        this.hiveMetastoreUri      = "thrift://localhost:9083";
-        this.icebergWarehouse      = "s3a://iceberg/";
-        this.icebergDatabase       = "default";
-        this.icebergTable          = "orders";
-
-        this.minioEndpoint         = "http://localhost:9000";
-        this.minioAccessKey        = "root";
-        this.minioSecretKey        = "root123456";
-
-        this.jobName               = "debezium-cdc-iceberg";
-        this.checkpointIntervalMs  = 30_000L;
-        this.parallelism  = 2;
-        this.checkpointDirectory = "";
-        this.savepointDirectory = "";
-    }
 
     private AppConfig(ParameterTool params) {
         this.kafkaBootstrapServers = params.get("kafka.bootstrap.servers", "kafka:29092");
         this.kafkaTopic            = params.get("kafka.topic", "dbserver1.public.orders");
         this.kafkaGroupId          = params.get("kafka.group.id", "flink-cdc-iceberg");
+        this.autoOffsetReset = Arrays.stream(OffsetResetStrategy.values())
+                .filter(e -> e.name().equalsIgnoreCase(params.get("kafka.auto.offset.reset", "")))
+                .findFirst()
+                .orElse(OffsetResetStrategy.LATEST);
+
         this.schemaRegistryUrl     = params.get("schema.registry.url", "http://schema-registry:8081");
 
         this.catalogName           = params.get("iceberg.catalog.name", "teko_datawarehouse");
@@ -84,6 +72,15 @@ public class AppConfig implements Serializable {
 
         this.jobName               = params.get("job.name", "debezium-cdc-iceberg");
         this.checkpointIntervalMs  = params.getLong("checkpoint.interval.ms", 30_000L);
+        this.minPauseBetweenCheckpoints  = params.getLong("min.pause.checkpoints.ms", 30_000L);
+        this.checkpointTimeoutMs  = params.getLong("checkpoint.timeout.ms", 60_000L);
+        this.maxConcurrentCheckpoints = params.getInt("max.concurrent.checkpoints", 1);
+
+        this.externalizedCheckpointRetention = Arrays.stream(ExternalizedCheckpointRetention.values())
+                .filter(e -> e.name().equalsIgnoreCase(params.get("max.concurrent.checkpoints", "")))
+                .findFirst()
+                .orElse(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
+
         this.parallelism  = params.getInt("parallelism", 2);
         this.checkpointDirectory = params.get("checkpoint.directory", "");
         this.savepointDirectory = params.get("savepoint.directory", "");
@@ -122,9 +119,14 @@ public class AppConfig implements Serializable {
     public String getMinioSecretKey()        { return minioSecretKey; }
     public String getJobName()               { return jobName; }
     public long   getCheckpointIntervalMs()  { return checkpointIntervalMs; }
+    public long getMinPauseBetweenCheckpoints() { return minPauseBetweenCheckpoints; }
     public int getParallelism() { return parallelism; }
     public String getCheckpointDirectory() { return checkpointDirectory; }
     public String getSavepointDirectory() { return savepointDirectory; }
+    public OffsetResetStrategy getAutoOffsetReset() { return autoOffsetReset; }
+    public long getCheckpointTimeoutMs() { return checkpointTimeoutMs; }
+    public int getMaxConcurrentCheckpoints() { return maxConcurrentCheckpoints; }
+    public ExternalizedCheckpointRetention getExternalizedCheckpointRetention() { return externalizedCheckpointRetention; }
 
     public String getFullTableIdentifier() {
         return icebergDatabase + "." + icebergTable;

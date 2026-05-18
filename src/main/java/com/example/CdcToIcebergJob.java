@@ -4,7 +4,6 @@ import com.example.config.AppConfig;
 import com.example.deserialization.DebeziumAvroToRowDataDeserializer;
 import com.example.sink.IcebergSinkFactoryV2;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -28,10 +27,10 @@ public class CdcToIcebergJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.enableCheckpointing(appConfig.getCheckpointIntervalMs());
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(appConfig.getCheckpointIntervalMs());
-        env.getCheckpointConfig().setCheckpointTimeout(60_000);
-        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
-        env.getCheckpointConfig().setExternalizedCheckpointRetention(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(appConfig.getMinPauseBetweenCheckpoints());
+        env.getCheckpointConfig().setCheckpointTimeout(appConfig.getCheckpointTimeoutMs());
+        env.getCheckpointConfig().setMaxConcurrentCheckpoints(appConfig.getMaxConcurrentCheckpoints());
+        env.getCheckpointConfig().setExternalizedCheckpointRetention(appConfig.getExternalizedCheckpointRetention());
 
         Configuration flinkConfig = new Configuration();
 
@@ -46,8 +45,7 @@ public class CdcToIcebergJob {
                 .setBootstrapServers(appConfig.getKafkaBootstrapServers())
                 .setTopics(appConfig.getKafkaTopic())
                 .setGroupId(appConfig.getKafkaGroupId())
-                .setStartingOffsets(OffsetsInitializer.committedOffsets(
-                        org.apache.kafka.clients.consumer.OffsetResetStrategy.EARLIEST))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(appConfig.getAutoOffsetReset()))
                 .setDeserializer(new DebeziumAvroToRowDataDeserializer(appConfig.getSchemaRegistryUrl()))
                 .setProperties(appConfig.kafkaConsumerProperties())
                 .build();
