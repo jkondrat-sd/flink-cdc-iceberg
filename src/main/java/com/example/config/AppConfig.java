@@ -77,7 +77,7 @@ public class AppConfig implements Serializable {
         this.maxConcurrentCheckpoints = params.getInt("max.concurrent.checkpoints", 1);
 
         this.externalizedCheckpointRetention = Arrays.stream(ExternalizedCheckpointRetention.values())
-                .filter(e -> e.name().equalsIgnoreCase(params.get("max.concurrent.checkpoints", "")))
+                .filter(e -> e.name().equalsIgnoreCase(params.get("externalized.checkpoint.retention", "")))
                 .findFirst()
                 .orElse(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
 
