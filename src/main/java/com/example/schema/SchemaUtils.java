@@ -48,6 +48,9 @@ public class SchemaUtils {
                     int scale = (Integer) unwarpedSchema.getObjectProp("scale");
                     return DataTypes.DECIMAL(precision, scale);
                 }
+                if (klazz == io.debezium.data.VariableScaleDecimal.class) {
+                    return DataTypes.DECIMAL(38, 18);
+                }
             } catch (ClassNotFoundException clfe) {
                 System.out.println("Cannot find class " + connectName.toString());
             }

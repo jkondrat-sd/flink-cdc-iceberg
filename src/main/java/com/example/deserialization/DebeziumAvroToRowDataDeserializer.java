@@ -162,16 +162,24 @@ public class DebeziumAvroToRowDataDeserializer
                         (org.apache.flink.table.types.logical.DecimalType) fieldDatatype.getLogicalType();
                 BigDecimal bd;
 
-                if (value instanceof BigDecimal) {
+                if (value instanceof org.apache.avro.generic.IndexedRecord) {
+                    // io.debezium.data.VariableScaleDecimal: { int scale, bytes value }
+                    org.apache.avro.generic.IndexedRecord rec =
+                            (org.apache.avro.generic.IndexedRecord) value;
+                    int recScale = ((Number) rec.get(rec.getSchema().getField("scale").pos())).intValue();
+                    byte[] unscaled = toBytes(rec.get(rec.getSchema().getField("value").pos()));
+                    bd = unscaled.length == 0
+                            ? BigDecimal.ZERO
+                            : new BigDecimal(new BigInteger(unscaled), recScale);
+
+                } else if (value instanceof BigDecimal) {
                     bd = (BigDecimal) value;
 
                 } else if (value instanceof byte[]) {
                     bd = new BigDecimal(new BigInteger((byte[]) value), dt.getScale());
 
                 } else if (value instanceof java.nio.ByteBuffer) {
-                    java.nio.ByteBuffer buf = (java.nio.ByteBuffer) value;
-                    byte[] bytes = new byte[buf.remaining()];
-                    buf.get(bytes);
+                    byte[] bytes = toBytes(value);
                     if (bytes.length == 0) {
                         bd = BigDecimal.ZERO;  // empty bytes = 0
                     } else {
@@ -183,8 +191,13 @@ public class DebeziumAvroToRowDataDeserializer
                     bd = new BigDecimal(s);
                 }
 
-                return org.apache.flink.table.data.DecimalData.fromBigDecimal(
+                DecimalData decimalData = org.apache.flink.table.data.DecimalData.fromBigDecimal(
                         bd, dt.getPrecision(), dt.getScale());
+                if (decimalData == null) {
+                    LOG.warn("Decimal {} does not fit DECIMAL({},{}); writing null",
+                            bd, dt.getPrecision(), dt.getScale());
+                }
+                return decimalData;
             }
 
             case DATE: {
@@ -230,6 +243,17 @@ public class DebeziumAvroToRowDataDeserializer
                 LOG.warn("Unhandled type {}; falling back to string", typeRoot);
                 return StringData.fromString(value.toString());
         }
+    }
+
+    // Avro `bytes` decodes to a ByteBuffer; tolerate a raw byte[] too.
+    private static byte[] toBytes(Object value) {
+        if (value instanceof byte[]) {
+            return (byte[]) value;
+        }
+        java.nio.ByteBuffer buf = (java.nio.ByteBuffer) value;
+        byte[] bytes = new byte[buf.remaining()];
+        buf.get(bytes);
+        return bytes;
     }
 
     @Override

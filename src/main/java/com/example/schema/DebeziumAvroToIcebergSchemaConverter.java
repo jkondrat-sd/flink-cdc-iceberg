@@ -59,6 +59,11 @@ public class DebeziumAvroToIcebergSchemaConverter {
             return Types.DecimalType.of(precision, scale);
         }
 
+        // io.debezium.data.VariableScaleDecimal → DECIMAL (per-row scale, pinned to a fixed type)
+        if ("io.debezium.data.VariableScaleDecimal".equals(connectName)) {
+            return Types.DecimalType.of(38, 18);
+        }
+
         // io.debezium.time.Date → DATE (int epoch days)
         if ("io.debezium.time.Date".equals(connectName)) {
             return Types.DateType.get();
